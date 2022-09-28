@@ -1,5 +1,7 @@
 import moviepy.editor as mp
 
+from povideo.lib.tencent.audio2txt_service import get_requestId, get_recognition_result, audio2txt_service
+
 
 class MainVideo():
 
@@ -18,3 +20,10 @@ class MainVideo():
             # specify the name for mp3 extracted
             clip.audio.write_audiofile('Audio.mp3')
             # you will notice mp3 file will be created at the specified location.
+
+    def audio2txt(self, audio_path, appid, secret_id, secret_key):
+        a2ts = audio2txt_service(appid, secret_id, secret_key)
+        requestId = a2ts.get_requestId(audio_path)
+        a2ts.get_recognition_result(requestId)
+        requestId = get_requestId(audio_path)
+        get_recognition_result(requestId)
