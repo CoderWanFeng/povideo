@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 """
 本地语音文件识别
-参考：https://blog.csdn.net/TomorrowAndTuture/article/details/100100430
+参考：
+    https://blog.csdn.net/TomorrowAndTuture/article/details/100100430
+    https://github.com/TencentCloud/tencentcloud-sdk-python
 """
-import os
 import requests
 import hashlib
 import time
 import hmac
-import base64
 import urllib
 import urllib.parse
 import json
 import base64
-# from .audio2txt_config import Config
-import random
 
 from tencentcloud.common import credential
 from tencentcloud.common.profile.client_profile import ClientProfile

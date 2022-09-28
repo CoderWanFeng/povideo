@@ -1,6 +1,6 @@
 import moviepy.editor as mp
 
-from povideo.lib.tencent.audio2txt_service import get_requestId, get_recognition_result, audio2txt_service
+from povideo.lib.tencent.audio2txt_service import audio2txt_service
 
 
 class MainVideo():
@@ -25,5 +25,3 @@ class MainVideo():
         a2ts = audio2txt_service(appid, secret_id, secret_key)
         requestId = a2ts.get_requestId(audio_path)
         a2ts.get_recognition_result(requestId)
-        requestId = get_requestId(audio_path)
-        get_recognition_result(requestId)
