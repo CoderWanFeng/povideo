@@ -4,8 +4,8 @@ mainVideo = MainVideo()
 
 
 # 从视频里提取音频
-def video2mp3(path, mp3_name=None):
-    mainVideo.video2mp3(path, mp3_name)
+def video2mp3(path, mp3_name=None, output_path=r'./'):
+    mainVideo.video2mp3(path, mp3_name, output_path)
 
 
 # 从音频里，提取文字
