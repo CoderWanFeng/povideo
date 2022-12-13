@@ -112,14 +112,13 @@ class audio2txt_service():
             sentence_list = recognition_text.split('\n')[0:-1]  # 列表最后一个元素是空字符串
             for sentence in sentence_list:
                 content = sentence.split('  ')[1]  # 获取单句通话内容
-                begin_time = sentence.split('  ')[0].split(',')[0][1:]  # 获取每句话的开始时间
-                begin_time = str(int(begin_time.split(":")[0]) * 60000 + int(begin_time.split(":")[1].replace(".", "")))
-                end_time = sentence.split('  ')[0].split(',')[1]  # 获取每句话的结束时间
-                end_time = str(int(end_time.split(":")[0]) * 60000 + int(end_time.split(":")[1].replace(".", "")))
-                speaker = sentence.split('  ')[0].split(',')[-1][:-1]  # 获取说话人
-                print(speaker + "\t" + content + '\t' + begin_time + '\t' + end_time)
+                # begin_time = sentence.split('  ')[0].split(',')[0][1:]  # 获取每句话的开始时间
+                # begin_time = str(int(begin_time.split(":")[0]) * 60000 + int(begin_time.split(":")[1].replace(".", "")))
+                # end_time = sentence.split('  ')[0].split(',')[1]  # 获取每句话的结束时间
+                # end_time = str(int(end_time.split(":")[0]) * 60000 + int(end_time.split(":")[1].replace(".", "")))
+                # speaker = sentence.split('  ')[0].split(',')[-1][:-1]  # 获取说话人
+                # print(speaker + "\t" + content + '\t' + begin_time + '\t' + end_time)
                 # print(speaker + "\t" + content + '\t' + filename + '\t' + begin_time + '\t' + end_time, file=doc)
+                print(content + '\n')
         except TencentCloudSDKException as err:
             print(err)
-
-
