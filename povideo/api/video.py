@@ -20,7 +20,7 @@ def audio2txt(audio_path, appid, secret_id, secret_key):
 
 def mark2video(video_path, output_path=r'./', output_name=r'mark2video.mp4', mark_str: str = "www.python-office.com",
                font_size=28,
-               font_type='Arial', font_color='white'):
+               font_type=r'C:\Windows\Fonts\arial.ttf', font_color='white'):
     """
     给视频添加水印
     :param video_path: 必填，视频地址
@@ -58,3 +58,7 @@ def txt2mp3(content='程序员晚枫', file=None, mp3=r'./程序员晚枫.mp3', 
         engine.runAndWait()
         return Path(mp3).absolute()
     return None
+
+
+if __name__ == '__main__':
+    mark2video(video_path=r'D:\software\obs\vedio\2024-12-02_22-36-41.mp4', output_path=r'./map3_path')

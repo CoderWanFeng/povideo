@@ -1,10 +1,9 @@
 import os
 from pathlib import Path
 
-import moviepy.editor as mp
-from moviepy.video.VideoClip import TextClip
-from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-from moviepy.video.io.VideoFileClip import VideoFileClip
+from moviepy import CompositeVideoClip
+from moviepy import TextClip
+from moviepy import VideoFileClip
 from pofile import mkdir
 
 from povideo.lib.tencent.audio2txt_service import audio2txt_service
@@ -20,7 +19,7 @@ class MainVideo():
         :return:
         """
         # specify the mp4 file here(mention the file path if it is in different directory)
-        clip = mp.VideoFileClip(path)
+        clip = VideoFileClip(path)
         if not Path(output_path).exists():
             os.makedirs(output_path)
         if mp3_name:
@@ -42,14 +41,13 @@ class MainVideo():
         clip = VideoFileClip(str(abs_video_path), audio=True)
         width, height = clip.size
         # 创建带有水印内容的文本动画对象
-        text = TextClip(mark_str, font=font_type, color=font_color, fontsize=font_size)
+        text = TextClip(text=mark_str, font=font_type, color=font_color, font_size=font_size)
         # 设置水印颜色，并调整大小、位置和透明度
-        set_color = text.on_color(size=(clip.w + text.w, text.h - 10), color=(0, 0, 0), pos=(6, 'center'), col_opacity=0.6)
-        # 设置水印文本的位置
-        set_textPos = set_color.set_pos(lambda pos: (max(width / 30, int(width - 0.5 * width * pos)), max(5 * height / 6, int(100 * pos))))
-        set_duration = set_textPos.set_duration(clip.duration)
+        text.pos = lambda pos: (max(width / 30, int(width - 0.5 * width * pos)), max(5 * height / 6, int(100 * pos)))
+        text.color = 'white'
+        text.duration = clip.duration
         # 合并视频和水印
-        Output = CompositeVideoClip([clip, set_duration])
+        Output = CompositeVideoClip([clip, text])
         # 设置输出视频的时长
         Output.duration = clip.duration
         # 创建输出路径
@@ -58,4 +56,3 @@ class MainVideo():
         abs_output_path = Path(os.path.join(output_path, output_name)).absolute()
         # 将合成后的视频保存为文件
         Output.write_videofile(str(abs_output_path), fps=30, codec='libx264')
-
