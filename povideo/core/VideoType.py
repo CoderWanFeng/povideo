@@ -1,10 +1,7 @@
 import os
 from pathlib import Path
 
-from moviepy import CompositeVideoClip
-from moviepy import TextClip
-from moviepy import VideoFileClip
-from pofile import mkdir
+from moviepy import CompositeVideoClip, ImageClip, TextClip, VideoFileClip
 
 from povideo.lib.tencent.audio2txt_service import audio2txt_service
 
@@ -34,25 +31,44 @@ class MainVideo():
         requestId = a2ts.get_requestId(audio_path)
         a2ts.get_recognition_result(requestId)
 
-    def mark2video(self, video_path, output_path, output_name, mark_str, font_size, font_type, font_color):
-        # 获取视频路径
-        abs_video_path = Path(video_path).absolute()
-        # 读取视频文件，并获取视频宽度和高度
-        clip = VideoFileClip(str(abs_video_path), audio=True)
-        width, height = clip.size
-        # 创建带有水印内容的文本动画对象
-        text = TextClip(text=mark_str, font=font_type, color=font_color, font_size=font_size)
-        # 设置水印颜色，并调整大小、位置和透明度
-        text.pos = lambda pos: (max(width / 30, int(width - 0.5 * width * pos)), max(5 * height / 6, int(100 * pos)))
-        text.color = 'white'
-        text.duration = clip.duration
+    def mark2video(self, input_file, output_file, watermark_content=None, watermark_type='text', position=(500, 500),
+                   font=None, font_size=50, color='black', opacity=1, image_watermark_path=None):
+
+        video = VideoFileClip(input_file)
+
+        # 创建水印
+        if watermark_type == 'text':
+            if not watermark_content:
+                raise ValueError("需要提供文字水印内容")
+            watermark = (
+                TextClip(text=watermark_content, font=font, font_size=font_size, color=color,
+                         margin=(video.size[0] / 2, video.size[1] / 2),
+                         duration=video.duration)
+            )
+        elif watermark_type == 'image':
+            if not image_watermark_path:
+                raise ValueError("需要提供图片水印文件路径")
+            # 确保图片水印路径存在
+            if not os.path.exists(image_watermark_path):
+                raise FileNotFoundError(f"图片水印文件 {image_watermark_path} 不存在")
+
+            # 加载图片水印并调整大小
+            image_watermark = ImageClip(image_watermark_path)
+            # 调整图片水印大小为原图的1/5
+            image_watermark = image_watermark.resize(0.2)
+            watermark = (image_watermark
+                         .set_position(position)
+                         .set_opacity(opacity)
+                         .set_duration(video.duration))
+        else:
+            raise ValueError("无效的水印类型，只能是 'text' 或 'image'")
+
         # 合并视频和水印
-        Output = CompositeVideoClip([clip, text])
-        # 设置输出视频的时长
-        Output.duration = clip.duration
-        # 创建输出路径
-        mkdir(output_path)
-        # 获取输出路径绝对路径
-        abs_output_path = Path(os.path.join(output_path, output_name)).absolute()
-        # 将合成后的视频保存为文件
-        Output.write_videofile(str(abs_output_path), fps=30, codec='libx264')
+        video_with_watermark = CompositeVideoClip([video, watermark])
+
+        # 写出最终视频
+        video_with_watermark.write_videofile(output_file, codec='libx264', fps=video.fps)
+
+        # 释放资源
+        video.close()
+        video_with_watermark.close()
