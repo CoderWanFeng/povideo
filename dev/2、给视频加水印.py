@@ -8,8 +8,10 @@
 '''
 
 import os
+from pathlib import Path
 
 from moviepy import VideoFileClip, TextClip, ImageClip, CompositeVideoClip
+from pofile import get_files
 
 
 def add_watermark_to_video(input_file, output_file, watermark_content=None, watermark_type='text', position=(500, 500),
@@ -71,7 +73,9 @@ def add_watermark_to_video(input_file, output_file, watermark_content=None, wate
 
 
 if __name__ == "__main__":
-    add_watermark_to_video(
-        input_file=r'D:\BaiduNetdiskDownload\给非程序员的python入门课\视频\第0讲：这个课程是为谁准备的.mp4',
-        output_file=r'./ou.mp4',
-        watermark_content="python-office")
+    v_fs = get_files(r'D:\BaiduNetdiskDownload\给非程序员的python入门课\视频')
+    for v in v_fs:
+        add_watermark_to_video(
+            input_file=v,
+            output_file=f'./out/{Path(v).name}',
+            watermark_content="www.python-office.com")
