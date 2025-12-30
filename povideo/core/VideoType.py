@@ -67,7 +67,7 @@ class MainVideo():
         video_with_watermark = CompositeVideoClip([video, watermark])
 
         # 写出最终视频
-        video_with_watermark.write_videofile(output_file, codec='libx264', fps=video.fps)
+        video_with_watermark.write_videofile(output_file, codec='libx264', fps=video.fps, threads=os.cpu_count(), preset='ultrafast')
 
         # 释放资源
         video.close()

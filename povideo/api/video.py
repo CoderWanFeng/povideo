@@ -9,30 +9,40 @@ mainVideo = MainVideo()
 
 # 从视频里提取音频
 def video2mp3(path, mp3_name=None, output_path=r'./'):
-    mainVideo.video2mp3(path, mp3_name, output_path)
+    mainVideo.video2mp3(path=path, mp3_name=mp3_name, output_path=output_path)
 
 
 # 从音频里，提取文字
 # 本地语音文件不能大于5MB
 def audio2txt(audio_path, appid, secret_id, secret_key):
-    mainVideo.audio2txt(audio_path, appid, secret_id, secret_key)
+    mainVideo.audio2txt(audio_path=audio_path, appid=appid, secret_id=secret_id, secret_key=secret_key)
 
 
-def mark2video(video_path, output_path=r'./', output_name=r'mark2video.mp4', mark_str: str = "www.python-office.com",
+def mark2video(video_path, output_path=None, output_name=None, watermark_content: str = "白开水AI",
                font_size=28,
-               font_type=r'C:\Windows\Fonts\arial.ttf', font_color='white'):
+               font_type=r'C:\Windows\Fonts\arial.ttf', font_color='black'):
     """
     给视频添加水印
     :param video_path: 必填，视频地址
-    :param output_path: 输出地址
-    :param output_name: 输出名称，记得带‘.mp4’
+    :param output_path: 输出地址，默认为输入视频所在目录
+    :param output_name: 输出名称，默认为原文件名添加'-水印版'后缀
     :param mark_str: 水印内容，只支持英文
     :param font_size: 水印字体大小
     :param font_color: 水印颜色
     :param font_type: 水印字体类型
     :return:
     """
-    mainVideo.mark2video(video_path, output_path, output_name, mark_str, font_size, font_type, font_color)
+    video_file = Path(video_path)
+    
+    # 默认输出路径为输入视频所在目录
+    if output_path is None:
+        output_path = video_file.parent
+    
+    # 默认输出文件名为原文件名添加'-水印版'后缀
+    if output_name is None:
+        output_name = f"{video_file.stem}-水印版{video_file.suffix}"
+    
+    mainVideo.mark2video(input_file=video_path, output_file=str(Path(output_path) / output_name), watermark_content=watermark_content, font=font_type, font_size=font_size, color=font_color)
 
 
 def txt2mp3(content='程序员晚枫', file=None, mp3=r'./程序员晚枫.mp3', speak=True) -> str:
