@@ -65,9 +65,12 @@ class MainVideo():
 
         # 合并视频和水印
         video_with_watermark = CompositeVideoClip([video, watermark])
+        
+        # 保留原视频的音频轨道
+        video_with_watermark = video_with_watermark.with_audio(video.audio)
 
         # 写出最终视频
-        video_with_watermark.write_videofile(output_file, codec='libx264', fps=video.fps, threads=os.cpu_count(), preset='ultrafast')
+        video_with_watermark.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=video.fps, threads=os.cpu_count(), preset='ultrafast')
 
         # 释放资源
         video.close()

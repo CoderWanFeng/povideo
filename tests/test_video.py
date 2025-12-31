@@ -9,7 +9,7 @@ class TestImage(unittest.TestCase):
                   output_path=r'./map3_path')
 
     def test_mark(self):
-        mark2video(video_path=r'D:\BaiduNetdiskDownload\10.Qoder课程\1.Qoder安装.mp4')
+        mark2video(video_path=r'/Users/wanfeng/Downloads/f827395fa379d1c59d9e1a4a3bc5398a.mp4')
 
     def test_txt2mp3_all(self):
         # 测试全部功能
