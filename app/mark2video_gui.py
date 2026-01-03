@@ -239,10 +239,10 @@ QMessageBox QPushButton {
 class GlowEffect(QGraphicsDropShadowEffect):
     """发光效果"""
     def __init__(self, color="#00d4ff", blur=20, parent=None):
-        super().__init__(parent)
-        self.setBlurRadius(blur)
-        self.setColor(QColor(color))
-        self.setOffset(0, 0)
+        super().__init__(parent=parent)
+        self.setBlurRadius(radius=blur)
+        self.setColor(color=QColor(color))
+        self.setOffset(dx=0, dy=0)
 
 
 class VideoProcessThread(QThread):
@@ -250,7 +250,7 @@ class VideoProcessThread(QThread):
     finished = Signal(bool, str)
     
     def __init__(self, video_path, output_path, output_name, watermark_content, font_size, font_type, font_color):
-        super().__init__()
+        super().__init__(parent=None)
         self.video_path = video_path
         self.output_path = output_path
         self.output_name = output_name
@@ -279,10 +279,10 @@ class Mark2VideoApp(QMainWindow):
     """视频水印工具主窗口 - 科技感界面"""
     
     def __init__(self):
-        super().__init__()
+        super().__init__(parent=None)
         self.setWindowTitle("✨ 视频水印工具 - povideo")
-        self.setMinimumSize(850, 720)
-        self.resize(900, 750)
+        self.setMinimumSize(w=850, h=720)
+        self.resize(w=900, h=750)
         self.font_color = "black"
         self.init_ui()
         self.apply_effects()
@@ -294,8 +294,8 @@ class Mark2VideoApp(QMainWindow):
         frame.setGraphicsEffect(GlowEffect(color="#6366f1", blur=15))
         
         layout = QVBoxLayout(frame)
-        layout.setSpacing(20)
-        layout.setContentsMargins(24, 20, 24, 24)
+        layout.setSpacing(spacing=20)
+        layout.setContentsMargins(left=24, top=20, right=24, bottom=24)
         
         title_label = QLabel(title)
         title_label.setProperty("class", "group-title")
@@ -307,23 +307,23 @@ class Mark2VideoApp(QMainWindow):
     def create_field_row(self, label_text, widget, button=None):
         """创建表单行 - 使用容器Widget避免重叠"""
         container = QWidget()
-        container.setFixedHeight(50)
+        container.setFixedHeight(h=50)
         
         row = QHBoxLayout(container)
-        row.setSpacing(15)
-        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(spacing=15)
+        row.setContentsMargins(left=0, top=0, right=0, bottom=0)
         
         label = QLabel(label_text)
         label.setProperty("class", "field-label")
-        label.setFixedWidth(90)
-        label.setFixedHeight(40)
+        label.setFixedWidth(w=90)
+        label.setFixedHeight(h=40)
         row.addWidget(label)
         
-        widget.setFixedHeight(44)
-        row.addWidget(widget, 1)
+        widget.setFixedHeight(h=44)
+        row.addWidget(widget, stretch=1)
         
         if button:
-            button.setFixedHeight(44)
+            button.setFixedHeight(h=44)
             row.addWidget(button)
         
         return container
@@ -333,8 +333,8 @@ class Mark2VideoApp(QMainWindow):
         self.setCentralWidget(central_widget)
         
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setSpacing(18)
-        main_layout.setContentsMargins(30, 30, 30, 30)
+        main_layout.setSpacing(spacing=18)
+        main_layout.setContentsMargins(left=30, top=30, right=30, bottom=30)
         
         # 顶部标题
         header = QLabel("🎬 视频水印工具")
@@ -380,19 +380,19 @@ class Mark2VideoApp(QMainWindow):
         
         # 字体大小和颜色放一行
         size_color_container = QWidget()
-        size_color_container.setFixedHeight(50)
+        size_color_container.setFixedHeight(h=50)
         size_color_row = QHBoxLayout(size_color_container)
-        size_color_row.setSpacing(40)
-        size_color_row.setContentsMargins(0, 0, 0, 0)
+        size_color_row.setSpacing(spacing=40)
+        size_color_row.setContentsMargins(left=0, top=0, right=0, bottom=0)
         
         # 字体大小
         size_sub = QHBoxLayout()
         size_label = QLabel("字体大小")
         size_label.setProperty("class", "field-label")
-        size_label.setMinimumWidth(70)
+        size_label.setMinimumWidth(minw=70)
         self.font_size_spin = QSpinBox()
-        self.font_size_spin.setRange(8, 200)
-        self.font_size_spin.setValue(28)
+        self.font_size_spin.setRange(minimum=8, maximum=200)
+        self.font_size_spin.setValue(val=28)
         size_sub.addWidget(size_label)
         size_sub.addWidget(self.font_size_spin)
         size_color_row.addLayout(size_sub)
@@ -401,9 +401,9 @@ class Mark2VideoApp(QMainWindow):
         color_sub = QHBoxLayout()
         color_label = QLabel("字体颜色")
         color_label.setProperty("class", "field-label")
-        color_label.setMinimumWidth(70)
+        color_label.setMinimumWidth(minw=70)
         self.color_preview = QLabel()
-        self.color_preview.setFixedSize(100, 36)
+        self.color_preview.setFixedSize(w=100, h=36)
         self.color_preview.setProperty("class", "color-preview")
         self.color_preview.setStyleSheet("""
             background-color: black;
@@ -433,8 +433,8 @@ class Mark2VideoApp(QMainWindow):
         
         # 进度条
         self.progress_bar = QProgressBar()
-        self.progress_bar.setRange(0, 0)
-        self.progress_bar.setFixedHeight(24)
+        self.progress_bar.setRange(minimum=0, maximum=0)
+        self.progress_bar.setFixedHeight(h=24)
         self.progress_bar.hide()
         process_layout.addWidget(self.progress_bar)
         
@@ -447,7 +447,7 @@ class Mark2VideoApp(QMainWindow):
         # 开始按钮
         self.start_btn = QPushButton("🚀 开始处理")
         self.start_btn.setProperty("class", "primary-btn")
-        self.start_btn.setMinimumHeight(50)
+        self.start_btn.setMinimumHeight(minh=50)
         self.start_btn.setCursor(Qt.PointingHandCursor)
         self.start_btn.clicked.connect(self.start_process)
         self.start_btn.setGraphicsEffect(GlowEffect(color="#8b5cf6", blur=25))
@@ -489,7 +489,7 @@ class Mark2VideoApp(QMainWindow):
     
     def select_color(self):
         """选择字体颜色"""
-        color = QColorDialog.getColor(QColor(self.font_color), self, "选择字体颜色")
+        color = QColorDialog.getColor(initial=QColor(self.font_color), parent=self, title="选择字体颜色")
         if color.isValid():
             self.font_color = color.name()
             self.color_preview.setStyleSheet(f"""
@@ -504,7 +504,7 @@ class Mark2VideoApp(QMainWindow):
         if not video_path:
             QMessageBox.warning(self, "⚠️ 警告", "请选择视频文件！")
             return False
-        if not os.path.exists(video_path):
+        if not os.path.exists(path=video_path):
             QMessageBox.warning(self, "⚠️ 警告", "视频文件不存在！")
             return False
         
@@ -527,7 +527,7 @@ class Mark2VideoApp(QMainWindow):
             return False
         
         font_type = self.font_type_edit.text().strip()
-        if not os.path.exists(font_type):
+        if not os.path.exists(path=font_type):
             QMessageBox.warning(self, "⚠️ 警告", "字体文件不存在！")
             return False
         
@@ -539,8 +539,8 @@ class Mark2VideoApp(QMainWindow):
             return
         
         output_path = self.output_path_edit.text().strip()
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
+        if not os.path.exists(path=output_path):
+            os.makedirs(name=output_path)
         
         self.start_btn.setEnabled(False)
         self.progress_bar.show()

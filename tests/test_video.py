@@ -10,8 +10,8 @@ class TestImage(unittest.TestCase):
 
     def test_mark(self):
         # mark2video(video_path=r'/Users/wanfeng/Downloads/undo',
-        mark2video(video_path=r'/Users/wanfeng/Downloads/test',
-        output_path=r'./out')
+        mark2video(video_path=r'/Users/wanfeng/Downloads/251228-讯飞智能体/剪辑后/长视频.mp4',
+        output_path=r'./tests/out')
 
     def test_txt2mp3_all(self):
         # 测试全部功能

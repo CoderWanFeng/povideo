@@ -32,7 +32,7 @@ def add_watermark_to_video(input_file, output_file, watermark_content=None, wate
     image_watermark_path -- 图片水印文件路径
     """
     # 加载视频
-    video = VideoFileClip(input_file)
+    video = VideoFileClip(filename=input_file)
 
     # 创建水印
     if watermark_type == 'text':
@@ -47,13 +47,13 @@ def add_watermark_to_video(input_file, output_file, watermark_content=None, wate
         if not image_watermark_path:
             raise ValueError("需要提供图片水印文件路径")
         # 确保图片水印路径存在
-        if not os.path.exists(image_watermark_path):
+        if not os.path.exists(path=image_watermark_path):
             raise FileNotFoundError(f"图片水印文件 {image_watermark_path} 不存在")
 
         # 加载图片水印并调整大小
-        image_watermark = ImageClip(image_watermark_path)
+        image_watermark = ImageClip(img=image_watermark_path)
         # 调整图片水印大小为原图的1/5
-        image_watermark = image_watermark.resize(0.2)
+        image_watermark = image_watermark.resize(new_size=0.2)
         watermark = (image_watermark
                      .set_position(position)
                      .set_opacity(opacity)
@@ -65,7 +65,7 @@ def add_watermark_to_video(input_file, output_file, watermark_content=None, wate
     video_with_watermark = CompositeVideoClip([video, watermark])
 
     # 写出最终视频
-    video_with_watermark.write_videofile(output_file, codec='libx264', fps=video.fps)
+    video_with_watermark.write_videofile(filename=output_file, codec='libx264', fps=video.fps)
 
     # 释放资源
     video.close()

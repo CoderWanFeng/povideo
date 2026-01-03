@@ -46,7 +46,7 @@ class audio2txt_service():
         request_data['res_type'] = 1
         request_data['source_type'] = 1
         request_data['sub_service_type'] = 0
-        with open(audio_url, 'rb') as f:
+        with open(file=audio_url, mode='rb') as f:
             body_data = f.read()
             body_len = str(len(body_data))
         authorization = self.generate_sign(request_data, self.appid)
@@ -56,7 +56,7 @@ class audio2txt_service():
             "Content-Length": body_len
         }
 
-        r = requests.post(task_req_url, headers=header, data=body_data)
+        r = requests.post(url=task_req_url, headers=header, data=body_data)
         return r.text
 
     def generate_sign(self, request_data, appid):
@@ -66,7 +66,7 @@ class audio2txt_service():
             sign_str = sign_str + key + "=" + urllib.parse.unquote(str(request_data[key])) + '&'
         sign_str = sign_str[:-1]
         authorization = base64.b64encode(
-            hmac.new(bytes(self.secret_key, 'utf-8'), bytes(sign_str, 'utf-8'), hashlib.sha1).digest())
+            hmac.new(key=bytes(self.secret_key, 'utf-8'), msg=bytes(sign_str, 'utf-8'), digestmod=hashlib.sha1).digest())
         # authorization = base64.b64encode(hmac.new(secret_key, sign_str, hashlib.sha1).digest())
         return authorization
 
@@ -78,35 +78,35 @@ class audio2txt_service():
         return result_url
 
     def get_requestId(self, audio_file_path):
-        request_result = self.task_process(audio_file_path)
+        request_result = self.task_process(audio_url=audio_file_path)
         print(request_result)
         requestId = eval(request_result)["requestId"]
         return requestId
 
     def get_recognition_result(self, requestId):
         try:
-            cred = credential.Credential(self.secret_id, self.secret_key)
+            cred = credential.Credential(secret_id=self.secret_id, secret_key=self.secret_key)
             httpProfile = HttpProfile()
             httpProfile.endpoint = "asr.tencentcloudapi.com"
 
             clientProfile = ClientProfile()
             clientProfile.httpProfile = httpProfile
-            client = asr_client.AsrClient(cred, "ap-guangzhou", clientProfile)
+            client = asr_client.AsrClient(credential=cred, region="ap-guangzhou", profile=clientProfile)
 
             while True:
                 req = models.DescribeTaskStatusRequest()
                 # 537731632
                 params = '{"TaskId":%s}' % requestId
-                req.from_json_string(params)
-                resp = client.DescribeTaskStatus(req)
-                recognition_text = json.loads(resp.to_json_string())
+                req.from_json_string(params=params)
+                resp = client.DescribeTaskStatus(request=req)
+                recognition_text = json.loads(s=resp.to_json_string())
                 recognition_status = recognition_text['Data']['StatusStr']
                 if recognition_status == "success":
                     print(recognition_text['Data']['TaskId'], "识别成功！")
                     break
                 if recognition_status == "failed":
                     raise TencentCloudSDKException
-                time.sleep(1)
+                time.sleep(secs=1)
                 # print(recognition_text)
             recognition_text = recognition_text['Data']['Result']
             sentence_list = recognition_text.split('\n')[0:-1]  # 列表最后一个元素是空字符串

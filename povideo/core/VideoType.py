@@ -17,20 +17,20 @@ class MainVideo():
         :return:
         """
         # specify the mp4 file here(mention the file path if it is in different directory)
-        clip = VideoFileClip(path)
+        clip = VideoFileClip(filename=path)
         if not Path(output_path).exists():
-            os.makedirs(output_path)
+            os.makedirs(name=output_path)
         if mp3_name:
             if not str(mp3_name).endswith('.mp3'):
                 mp3_name = str(mp3_name) + '.mp3'
         else:
             mp3_name = 'Audio.mp3'
-        clip.audio.write_audiofile(Path(output_path) / mp3_name)
+        clip.audio.write_audiofile(filename=Path(output_path) / mp3_name)
 
     def audio2txt(self, audio_path, appid, secret_id, secret_key):
-        a2ts = audio2txt_service(appid, secret_id, secret_key)
-        requestId = a2ts.get_requestId(audio_path)
-        a2ts.get_recognition_result(requestId)
+        a2ts = audio2txt_service(appid=appid, secret_id=secret_id, secret_key=secret_key)
+        requestId = a2ts.get_requestId(audio_file_path=audio_path)
+        a2ts.get_recognition_result(requestId=requestId)
 
     def mark2video(self, input_file, output_file, watermark_content=None, watermark_type='text', position='center',
                    font=None, font_size=50, color='white', opacity=1, image_watermark_path=None):
@@ -83,24 +83,24 @@ class MainVideo():
                 drawtext_params['fontfile'] = font
             
             # 使用 ffmpeg-python 添加文字水印
-            stream = ffmpeg.input(input_file)
-            stream = ffmpeg.drawtext(stream, **drawtext_params)
+            stream = ffmpeg.input(filename=input_file)
+            stream = ffmpeg.drawtext(stream=stream, **drawtext_params)
             stream = ffmpeg.output(
                 stream,
-                ffmpeg.input(input_file).audio,  # 直接复制音频流
+                ffmpeg.input(filename=input_file).audio,  # 直接复制音频流
                 output_file,
                 vcodec='libx264',
                 preset='fast',
                 crf=23,
                 acodec='copy'  # 音频直接复制，不重新编码
             )
-            ffmpeg.run(stream, overwrite_output=True, quiet=True)
+            ffmpeg.run(stream_spec=stream, overwrite_output=True, quiet=True)
             
         elif watermark_type == 'image':
             if not image_watermark_path:
                 raise ValueError("需要提供图片水印文件路径")
             
-            if not os.path.exists(image_watermark_path):
+            if not os.path.exists(path=image_watermark_path):
                 raise FileNotFoundError(f"图片水印文件 {image_watermark_path} 不存在")
             
             # 位置映射
@@ -119,30 +119,30 @@ class MainVideo():
                 overlay_pos = position_map.get(position, position_map['center'])
             
             # 使用 ffmpeg-python 添加图片水印
-            main_video = ffmpeg.input(input_file)
-            watermark = ffmpeg.input(image_watermark_path)
+            main_video = ffmpeg.input(filename=input_file)
+            watermark = ffmpeg.input(filename=image_watermark_path)
             
             # 缩放水印图片为视频宽度的1/5
-            watermark = ffmpeg.filter(watermark, 'scale', 'iw/5', 'ih/5')
+            watermark = ffmpeg.filter(stream_spec=watermark, filter_name='scale', w='iw/5', h='ih/5')
             
             # 设置透明度
             if opacity < 1:
-                watermark = ffmpeg.filter(watermark, 'format', 'rgba')
-                watermark = ffmpeg.filter(watermark, 'colorchannelmixer', aa=opacity)
+                watermark = ffmpeg.filter(stream_spec=watermark, filter_name='format', pix_fmts='rgba')
+                watermark = ffmpeg.filter(stream_spec=watermark, filter_name='colorchannelmixer', aa=opacity)
             
             # 叠加水印
-            stream = ffmpeg.overlay(main_video, watermark, x=overlay_pos.split(':')[0], y=overlay_pos.split(':')[1])
+            stream = ffmpeg.overlay(main=main_video, overlay=watermark, x=overlay_pos.split(':')[0], y=overlay_pos.split(':')[1])
             
             stream = ffmpeg.output(
                 stream,
-                ffmpeg.input(input_file).audio,
+                ffmpeg.input(filename=input_file).audio,
                 output_file,
                 vcodec='libx264',
                 preset='fast',
                 crf=23,
                 acodec='copy'
             )
-            ffmpeg.run(stream, overwrite_output=True, quiet=True)
+            ffmpeg.run(stream_spec=stream, overwrite_output=True, quiet=True)
             
         else:
             raise ValueError("无效的水印类型，只能是 'text' 或 'image'")

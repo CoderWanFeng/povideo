@@ -127,9 +127,9 @@ def _process_single_video(video_path: str, output_dir: str, output_name: str,
 
 def mark2video(video_path: str,
                output_path: Optional[str] = None, output_name: Optional[str] = None, 
-               watermark_content: str = "白开水AI",
+               watermark_content: str = "白开水AI社区",
                font_size: int = 28,
-               font_type: Optional[str] = None, font_color: str = 'black',
+               font_type: Optional[str] = None, font_color: str = 'red',
                max_workers: Optional[int] = None) -> Optional[List[Dict[str, any]]]:
     """
     给视频添加水印，支持单个视频处理和批量处理
@@ -369,15 +369,15 @@ def txt2mp3(content='程序员晚枫', file=None, mp3=r'./程序员晚枫.mp3', 
     """
     # 是否读文件
     if file:
-        with open(file, encoding='utf-8', mode='r') as f_c:
+        with open(file=file, encoding='utf-8', mode='r') as f_c:
             content = f_c.read()
     # 是否朗读
     if speak:
-        pyttsx3.speak(content)
+        pyttsx3.speak(text=content)
     # 是否存为mp3
     if mp3 != None:
         engine = pyttsx3.init()
-        engine.save_to_file(content, mp3)
+        engine.save_to_file(text=content, filename=mp3)
         engine.runAndWait()
         return Path(mp3).absolute()
     return None

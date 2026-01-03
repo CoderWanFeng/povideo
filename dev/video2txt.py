@@ -12,11 +12,11 @@ from faster_whisper import WhisperModel
 
 def transcribe_audio(audio_path, model_path):
     # 加载模型
-    model = WhisperModel(model_path)
+    model = WhisperModel(model_size_or_path=model_path)
     model.eval()
 
     # 加载音频文件
-    waveform, sample_rate = torchaudio.load(audio_path)
+    waveform, sample_rate = torchaudio.load(filepath=audio_path)
 
     # 对音频进行处理（如需要）
     # ...
@@ -30,5 +30,5 @@ def transcribe_audio(audio_path, model_path):
     return text
 
 
-text = transcribe_audio('output_audio.wav', 'path_to_faster_whisper_model')
+text = transcribe_audio(audio_path='output_audio.wav', model_path='path_to_faster_whisper_model')
 print(text)

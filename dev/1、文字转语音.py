@@ -11,11 +11,11 @@ import pyttsx3
 
 engine = pyttsx3.init()  # 初始化语音引擎
 
-engine.setProperty('rate', 100)  # 设置语速
-engine.setProperty('volume', 0.6)  # 设置音量
-voices = engine.getProperty('voices')
-engine.setProperty('voice', voices[0].id)  # 设置第一个语音合成器
-engine.say("程序员晚枫")
+engine.setProperty(name='rate', value=100)  # 设置语速
+engine.setProperty(name='volume', value=0.6)  # 设置音量
+voices = engine.getProperty(name='voices')
+engine.setProperty(name='voice', value=voices[0].id)  # 设置第一个语音合成器
+engine.say(text="程序员晚枫")
 engine.runAndWait()
 engine.stop()
 
@@ -23,6 +23,6 @@ engine.stop()
 
 import pyttsx3
 #语音播放
-pyttsx3.speak("程序员晚枫")
-pyttsx3.speak("How are you?")
-pyttsx3.speak("I am fine, thank you")
+pyttsx3.speak(text="程序员晚枫")
+pyttsx3.speak(text="How are you?")
+pyttsx3.speak(text="I am fine, thank you")
