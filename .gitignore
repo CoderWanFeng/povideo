@@ -11,3 +11,6 @@ dist/
 *.egg-info
 
 __pycache__
+
+# 测试输出目录
+tests/out/
