@@ -299,7 +299,7 @@ class MainVideo():
             final.write_videofile(
                 filename=output_file,
                 codec='libx264',
-                preset='fast',
+                preset='ultrafast',
                 threads=4,
                 audio_codec='aac',
                 logger=None  # 禁用 moviepy 的进度日志
