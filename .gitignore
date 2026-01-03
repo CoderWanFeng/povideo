@@ -14,3 +14,26 @@ __pycache__
 
 # 测试输出目录
 tests/out/
+
+# 视频文件
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+*.flv
+*.m4v
+*.mpeg
+*.mpg
+*.webm
+*.3gp
+
+# 音频文件
+*.mp3
+*.wav
+*.aac
+*.flac
+*.ogg
+*.wma
+*.m4a
+*.aiff

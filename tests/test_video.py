@@ -10,7 +10,7 @@ class TestImage(unittest.TestCase):
 
     def test_mark(self):
         # mark2video(video_path=r'/Users/wanfeng/Downloads/undo',
-        mark2video(video_path=r'/Users/wanfeng/Downloads/251228-讯飞智能体/剪辑后/长视频.mp4',
+        mark2video(video_path=r'd:\software\obs\vedio\2025-12-21_17-56-29.mp4',
         output_path=r'./tests/out')
 
     def test_txt2mp3_all(self):
