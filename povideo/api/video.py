@@ -127,7 +127,7 @@ def _process_single_video(video_path: str, output_dir: str, output_name: str,
 
 def mark2video(video_path: str,
                output_path: Optional[str] = None, output_name: Optional[str] = None, 
-               watermark_content: str = "白开水AI社区",
+               watermark_content: str = "白开水AI社区：wfdev7",
                font_size: int = 28,
                font_type: Optional[str] = None, font_color: str = 'red',
                max_workers: Optional[int] = None) -> Optional[List[Dict[str, any]]]:
