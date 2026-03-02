@@ -240,9 +240,9 @@ class GlowEffect(QGraphicsDropShadowEffect):
     """发光效果"""
     def __init__(self, color="#00d4ff", blur=20, parent=None):
         super().__init__(parent=parent)
-        self.setBlurRadius(radius=blur)
-        self.setColor(color=QColor(color))
-        self.setOffset(dx=0, dy=0)
+        self.setBlurRadius(blur)
+        self.setColor(QColor(color))
+        self.setOffset(0, 0)
 
 
 class VideoProcessThread(QThread):
@@ -261,18 +261,53 @@ class VideoProcessThread(QThread):
     
     def run(self):
         try:
-            mark2video(
-                video_path=self.video_path,
-                output_path=self.output_path,
-                output_name=self.output_name,
-                watermark_content=self.watermark_content,
-                font_size=self.font_size,
-                font_type=self.font_type,
-                font_color=self.font_color
-            )
-            self.finished.emit(True, "视频水印添加成功！")
+            # 判断是单文件还是批量处理
+            is_batch = os.path.isdir(self.video_path)
+            
+            if is_batch:
+                # 批量处理模式
+                results = mark2video(
+                    video_path=self.video_path,
+                    output_path=self.output_path,
+                    watermark_content=self.watermark_content,
+                    font_size=self.font_size,
+                    font_type=self.font_type,
+                    font_color=self.font_color
+                )
+                
+                # 统计结果
+                if results:
+                    success_count = sum(1 for r in results if r['success'])
+                    total_count = len(results)
+                    message = f"批量处理完成！\n\n成功：{success_count}/{total_count}\n失败：{total_count - success_count}"
+                    
+                    # 列出失败的文件
+                    if success_count < total_count:
+                        failed_files = [r['video'] for r in results if not r['success']]
+                        message += f"\n\n失败文件：\n" + "\n".join([os.path.basename(f) for f in failed_files[:5]])
+                        if len(failed_files) > 5:
+                            message += f"\n... 还有 {len(failed_files) - 5} 个文件"
+                    
+                    self.finished.emit(success_count > 0, message)
+                else:
+                    self.finished.emit(False, "批量处理失败：未找到视频文件或处理异常")
+            else:
+                # 单文件处理模式
+                mark2video(
+                    video_path=self.video_path,
+                    output_path=self.output_path,
+                    output_name=self.output_name,
+                    watermark_content=self.watermark_content,
+                    font_size=self.font_size,
+                    font_type=self.font_type,
+                    font_color=self.font_color
+                )
+                output_file = os.path.join(self.output_path, self.output_name)
+                self.finished.emit(True, f"视频水印添加成功！\n\n输出文件：{output_file}")
         except Exception as e:
-            self.finished.emit(False, f"处理失败：{str(e)}")
+            import traceback
+            error_detail = traceback.format_exc()
+            self.finished.emit(False, f"处理失败：{str(e)}\n\n详细错误：\n{error_detail}")
 
 
 class Mark2VideoApp(QMainWindow):
@@ -281,8 +316,8 @@ class Mark2VideoApp(QMainWindow):
     def __init__(self):
         super().__init__(parent=None)
         self.setWindowTitle("✨ 视频水印工具 - povideo")
-        self.setMinimumSize(w=850, h=720)
-        self.resize(w=900, h=750)
+        self.setMinimumSize(850, 720)
+        self.resize(900, 750)
         self.font_color = "black"
         self.init_ui()
         self.apply_effects()
@@ -294,8 +329,8 @@ class Mark2VideoApp(QMainWindow):
         frame.setGraphicsEffect(GlowEffect(color="#6366f1", blur=15))
         
         layout = QVBoxLayout(frame)
-        layout.setSpacing(spacing=20)
-        layout.setContentsMargins(left=24, top=20, right=24, bottom=24)
+        layout.setSpacing(20)
+        layout.setContentsMargins(24, 20, 24, 24)
         
         title_label = QLabel(title)
         title_label.setProperty("class", "group-title")
@@ -307,23 +342,23 @@ class Mark2VideoApp(QMainWindow):
     def create_field_row(self, label_text, widget, button=None):
         """创建表单行 - 使用容器Widget避免重叠"""
         container = QWidget()
-        container.setFixedHeight(h=50)
+        container.setFixedHeight(50)
         
         row = QHBoxLayout(container)
-        row.setSpacing(spacing=15)
-        row.setContentsMargins(left=0, top=0, right=0, bottom=0)
+        row.setSpacing(15)
+        row.setContentsMargins(0, 0, 0, 0)
         
         label = QLabel(label_text)
         label.setProperty("class", "field-label")
-        label.setFixedWidth(w=90)
-        label.setFixedHeight(h=40)
+        label.setFixedWidth(90)
+        label.setFixedHeight(40)
         row.addWidget(label)
         
-        widget.setFixedHeight(h=44)
+        widget.setFixedHeight(44)
         row.addWidget(widget, stretch=1)
         
         if button:
-            button.setFixedHeight(h=44)
+            button.setFixedHeight(44)
             row.addWidget(button)
         
         return container
@@ -333,8 +368,8 @@ class Mark2VideoApp(QMainWindow):
         self.setCentralWidget(central_widget)
         
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setSpacing(spacing=18)
-        main_layout.setContentsMargins(left=30, top=30, right=30, bottom=30)
+        main_layout.setSpacing(18)
+        main_layout.setContentsMargins(30, 30, 30, 30)
         
         # 顶部标题
         header = QLabel("🎬 视频水印工具")
@@ -380,19 +415,19 @@ class Mark2VideoApp(QMainWindow):
         
         # 字体大小和颜色放一行
         size_color_container = QWidget()
-        size_color_container.setFixedHeight(h=50)
+        size_color_container.setFixedHeight(50)
         size_color_row = QHBoxLayout(size_color_container)
-        size_color_row.setSpacing(spacing=40)
-        size_color_row.setContentsMargins(left=0, top=0, right=0, bottom=0)
+        size_color_row.setSpacing(40)
+        size_color_row.setContentsMargins(0, 0, 0, 0)
         
         # 字体大小
         size_sub = QHBoxLayout()
         size_label = QLabel("字体大小")
         size_label.setProperty("class", "field-label")
-        size_label.setMinimumWidth(minw=70)
+        size_label.setMinimumWidth(70)
         self.font_size_spin = QSpinBox()
-        self.font_size_spin.setRange(minimum=8, maximum=200)
-        self.font_size_spin.setValue(val=28)
+        self.font_size_spin.setRange(8, 200)
+        self.font_size_spin.setValue(28)
         size_sub.addWidget(size_label)
         size_sub.addWidget(self.font_size_spin)
         size_color_row.addLayout(size_sub)
@@ -401,9 +436,9 @@ class Mark2VideoApp(QMainWindow):
         color_sub = QHBoxLayout()
         color_label = QLabel("字体颜色")
         color_label.setProperty("class", "field-label")
-        color_label.setMinimumWidth(minw=70)
+        color_label.setMinimumWidth(70)
         self.color_preview = QLabel()
-        self.color_preview.setFixedSize(w=100, h=36)
+        self.color_preview.setFixedSize(100, 36)
         self.color_preview.setProperty("class", "color-preview")
         self.color_preview.setStyleSheet("""
             background-color: black;
@@ -433,8 +468,8 @@ class Mark2VideoApp(QMainWindow):
         
         # 进度条
         self.progress_bar = QProgressBar()
-        self.progress_bar.setRange(minimum=0, maximum=0)
-        self.progress_bar.setFixedHeight(h=24)
+        self.progress_bar.setRange(0, 0)
+        self.progress_bar.setFixedHeight(24)
         self.progress_bar.hide()
         process_layout.addWidget(self.progress_bar)
         
@@ -447,7 +482,7 @@ class Mark2VideoApp(QMainWindow):
         # 开始按钮
         self.start_btn = QPushButton("🚀 开始处理")
         self.start_btn.setProperty("class", "primary-btn")
-        self.start_btn.setMinimumHeight(minh=50)
+        self.start_btn.setMinimumHeight(50)
         self.start_btn.setCursor(Qt.PointingHandCursor)
         self.start_btn.clicked.connect(self.start_process)
         self.start_btn.setGraphicsEffect(GlowEffect(color="#8b5cf6", blur=25))
@@ -466,12 +501,67 @@ class Mark2VideoApp(QMainWindow):
         self.setStyleSheet(DARK_STYLE)
     
     def select_video(self):
-        """选择视频文件"""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "选择视频文件", "", "视频文件 (*.mp4 *.avi *.mkv *.mov *.wmv);;所有文件 (*)"
-        )
-        if file_path:
-            self.video_path_edit.setText(file_path)
+        """选择视频文件或文件夹"""
+        # 创建自定义对话框让用户选择文件或文件夹
+        from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QRadioButton, QButtonGroup
+        
+        dialog = QDialog(self)
+        dialog.setWindowTitle("选择处理模式")
+        dialog.setMinimumWidth(350)
+        dialog.setStyleSheet(DARK_STYLE)
+        
+        layout = QVBoxLayout(dialog)
+        layout.setSpacing(20)
+        layout.setContentsMargins(30, 30, 30, 30)
+        
+        # 提示文字
+        tip_label = QLabel("请选择处理模式：")
+        tip_label.setStyleSheet("color: #00d4ff; font-size: 16px; font-weight: bold;")
+        layout.addWidget(tip_label)
+        
+        # 单选按钮组
+        button_group = QButtonGroup(dialog)
+        radio_file = QRadioButton("📄 单个视频文件")
+        radio_file.setStyleSheet("color: #e0e0e0; font-size: 14px; padding: 8px;")
+        radio_folder = QRadioButton("📁 批量处理（文件夹）")
+        radio_folder.setStyleSheet("color: #e0e0e0; font-size: 14px; padding: 8px;")
+        radio_file.setChecked(True)
+        
+        button_group.addButton(radio_file)
+        button_group.addButton(radio_folder)
+        
+        layout.addWidget(radio_file)
+        layout.addWidget(radio_folder)
+        
+        # 按钮
+        btn_layout = QHBoxLayout()
+        ok_btn = QPushButton("确定")
+        ok_btn.setProperty("class", "primary-btn")
+        ok_btn.setMinimumHeight(40)
+        ok_btn.clicked.connect(dialog.accept)
+        cancel_btn = QPushButton("取消")
+        cancel_btn.setMinimumHeight(40)
+        cancel_btn.clicked.connect(dialog.reject)
+        btn_layout.addWidget(cancel_btn)
+        btn_layout.addWidget(ok_btn)
+        layout.addLayout(btn_layout)
+        
+        if dialog.exec() == QDialog.Accepted:
+            if radio_file.isChecked():
+                # 选择单个文件
+                file_path, _ = QFileDialog.getOpenFileName(
+                    self, "选择视频文件", "", "视频文件 (*.mp4 *.avi *.mkv *.mov *.wmv *.flv *.m4v *.mpeg *.mpg);;所有文件 (*)"
+                )
+                if file_path:
+                    self.video_path_edit.setText(file_path)
+                    self.output_name_edit.setEnabled(True)
+            else:
+                # 选择文件夹
+                folder_path = QFileDialog.getExistingDirectory(self, "选择视频文件夹")
+                if folder_path:
+                    self.video_path_edit.setText(folder_path)
+                    self.output_name_edit.setEnabled(False)
+                    self.output_name_edit.setText("[批量模式-自动命名]")
     
     def select_output_path(self):
         """选择输出目录"""
@@ -502,10 +592,10 @@ class Mark2VideoApp(QMainWindow):
         """验证输入参数"""
         video_path = self.video_path_edit.text().strip()
         if not video_path:
-            QMessageBox.warning(self, "⚠️ 警告", "请选择视频文件！")
+            QMessageBox.warning(self, "⚠️ 警告", "请选择视频文件或文件夹！")
             return False
         if not os.path.exists(path=video_path):
-            QMessageBox.warning(self, "⚠️ 警告", "视频文件不存在！")
+            QMessageBox.warning(self, "⚠️ 警告", "视频文件或文件夹不存在！")
             return False
         
         output_path = self.output_path_edit.text().strip()
@@ -513,13 +603,18 @@ class Mark2VideoApp(QMainWindow):
             QMessageBox.warning(self, "⚠️ 警告", "请设置输出路径！")
             return False
         
-        output_name = self.output_name_edit.text().strip()
-        if not output_name:
-            QMessageBox.warning(self, "⚠️ 警告", "请设置输出文件名！")
-            return False
-        if not output_name.endswith('.mp4'):
-            QMessageBox.warning(self, "⚠️ 警告", "输出文件名需以 .mp4 结尾！")
-            return False
+        # 判断是否为批量模式
+        is_batch = os.path.isdir(video_path)
+        
+        if not is_batch:
+            # 单文件模式需要验证输出文件名
+            output_name = self.output_name_edit.text().strip()
+            if not output_name or output_name == "[批量模式-自动命名]":
+                QMessageBox.warning(self, "⚠️ 警告", "请设置输出文件名！")
+                return False
+            if not output_name.endswith('.mp4'):
+                QMessageBox.warning(self, "⚠️ 警告", "输出文件名需以 .mp4 结尾！")
+                return False
         
         watermark = self.watermark_edit.text().strip()
         if not watermark:
@@ -527,7 +622,7 @@ class Mark2VideoApp(QMainWindow):
             return False
         
         font_type = self.font_type_edit.text().strip()
-        if not os.path.exists(path=font_type):
+        if font_type and not os.path.exists(path=font_type):
             QMessageBox.warning(self, "⚠️ 警告", "字体文件不存在！")
             return False
         
@@ -538,22 +633,56 @@ class Mark2VideoApp(QMainWindow):
         if not self.validate_inputs():
             return
         
+        video_path = self.video_path_edit.text().strip()
         output_path = self.output_path_edit.text().strip()
+        
+        # 判断是批量模式还是单文件模式
+        is_batch = os.path.isdir(video_path)
+        
+        if is_batch:
+            # 批量模式：提前统计文件数量并询问用户确认
+            from pathlib import Path
+            video_extensions = ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.m4v', '.mpeg', '.mpg']
+            video_files = []
+            for ext in video_extensions:
+                video_files.extend(Path(video_path).rglob(f'*{ext}'))
+                video_files.extend(Path(video_path).rglob(f'*{ext.upper()}'))
+            
+            if not video_files:
+                QMessageBox.warning(self, "⚠️ 警告", f"在文件夹中未找到视频文件！\n\n支持的格式：{', '.join(video_extensions)}")
+                return
+            
+            reply = QMessageBox.question(
+                self, 
+                "📊 批量处理确认", 
+                f"找到 {len(video_files)} 个视频文件\n\n是否开始批量处理？",
+                QMessageBox.Yes | QMessageBox.No
+            )
+            
+            if reply != QMessageBox.Yes:
+                return
+        
         if not os.path.exists(path=output_path):
             os.makedirs(name=output_path)
         
         self.start_btn.setEnabled(False)
         self.progress_bar.show()
-        self.status_label.setText("⏳ 正在处理，请稍候...")
+        
+        if is_batch:
+            self.status_label.setText("⏳ 批量处理中，请稍候...")
+        else:
+            self.status_label.setText("⏳ 正在处理，请稍候...")
         self.status_label.setStyleSheet("color: #f59e0b;")
         
+        output_name = self.output_name_edit.text().strip() if not is_batch else None
+        
         self.thread = VideoProcessThread(
-            video_path=self.video_path_edit.text().strip(),
+            video_path=video_path,
             output_path=output_path,
-            output_name=self.output_name_edit.text().strip(),
+            output_name=output_name,
             watermark_content=self.watermark_edit.text().strip(),
             font_size=self.font_size_spin.value(),
-            font_type=self.font_type_edit.text().strip(),
+            font_type=self.font_type_edit.text().strip() or None,
             font_color=self.font_color
         )
         self.thread.finished.connect(self.on_process_finished)
@@ -567,6 +696,8 @@ class Mark2VideoApp(QMainWindow):
         if success:
             self.status_label.setText("✅ 处理完成！")
             self.status_label.setStyleSheet("color: #10b981;")
+            
+            # 显示详细的成功信息
             QMessageBox.information(self, "🎉 成功", message)
         else:
             self.status_label.setText("❌ 处理失败")
